@@ -2,35 +2,55 @@ pipeline {
     agent any
 
     stages {
-
         stage('Checkout') {
             steps {
                 checkout scm
             }
         }
 
+        stage('Create Virtual Environment') {
+            steps {
+                sh '''
+                    python3 -m venv venv
+                '''
+            }
+        }
+
         stage('Install Dependencies') {
             steps {
-                sh 'python3 -m pip install --upgrade pip'
-                sh 'pip3 install -r requirements.txt'
+                sh '''
+                    . venv/bin/activate
+                    pip install --upgrade pip
+                    pip install -r requirements.txt
+                '''
             }
         }
 
         stage('Run Lint') {
             steps {
-                sh 'flake8 app.py'
+                sh '''
+                    . venv/bin/activate
+                    flake8 app.py
+                '''
             }
         }
 
         stage('Run Tests') {
             steps {
-                sh 'pytest'
+                sh '''
+                    . venv/bin/activate
+                    export PYTHONPATH=$WORKSPACE
+                    python -m pytest -v
+                '''
             }
         }
 
         stage('Run Application') {
             steps {
-                sh 'python3 app.py'
+                sh '''
+                    . venv/bin/activate
+                    python3 app.py
+                '''
             }
         }
     }
@@ -39,7 +59,6 @@ pipeline {
         success {
             echo 'Build Successful'
         }
-
         failure {
             echo 'Build Failed'
         }
