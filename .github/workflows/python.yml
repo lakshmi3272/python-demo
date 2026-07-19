@@ -1,0 +1,36 @@
+name: Python CI
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v5
+
+      - name: Verify Python Installation
+        run: |
+          python3 --version
+          pip3 --version
+
+      - name: Install Dependencies
+        run: |
+          python3 -m pip install --upgrade pip
+          pip3 install -r requirements.txt
+
+      - name: Run Lint
+        run: |
+          flake8 app.py
+
+      - name: Run Unit Tests
+        run: |
+          pytest -v
+
+      - name: Run Python Application
+        run: |
+          python3 app.py
